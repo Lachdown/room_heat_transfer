@@ -51,7 +51,7 @@ class room(object):
                     if (self.x[i] >= s.x0 and self.x[i] <= s.x1) and (self.y[j] >= s.y0 and self.y[j] <= s.y1):
                         self.temp[i][j] = s.temps[0]
                         self.filled[i][j] = 's_'+s.name
-                        self.sources.append(s.name)
+                        self.sources.append(s)
 
     def add_calc_point(self,n,*calc_points):
         '''
@@ -69,7 +69,41 @@ class room(object):
                 for j in range(n): 
                     if (self.x[i] >= c.x0 and self.x[i] <= c.x1) and (self.y[j] >= c.y0 and self.y[j] <= c.y1):
                         self.filled[i][j] = 'c_'+c.name
-                        self.calc_points.append(c.name)
+                        self.calc_points.append(c)
+
+
+    def calc_point_avg(self,n,*calc_points):
+        ''' 
+        Returns a list of average temperatures within the calculation areas
+
+            Parameters:
+            -----------
+
+            n:  int
+                number of divisions in room object
+            calc_points: list of calc_point objects
+                some number of calculation points within the room object
+
+            Notes:
+            -----
+
+            Averages of calc zones will be returned in the same order given
+
+        '''
+        num,tot = 0,0
+        #averages = []
+
+        for calc in calc_points:
+            for i in range(n):
+                for j in range(n):
+                    if self.filled[i][j] == 'c_' + calc.name:
+                        num += 1
+                        tot += self.temp[i][j]
+
+            calc.T_avg = tot/num
+            #averages.append(tot/num)
+
+        #return averages
 
 class calc_point(object):
     ''' points at which the average temp is to be calculated over time

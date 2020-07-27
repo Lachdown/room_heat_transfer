@@ -1,8 +1,48 @@
 from classes import*
 
-def TTrans_step(temp,fill):
-    pass
+def TTrans_step(room,temp,fill):
+    new_temps = np.copy(room.temp)
+    
+    for i in range(np.shape(room.temp)[0]):
+        for j in range(np.shape(room.temp)[1]):
+            if room.filled[i][j][0] != 's':
+                new_temps[i][j] = surround_temp(room,i,j)
 
+    room.temp = new_temps
+
+def surround_temp(room,i,j):
+    '''return the average temperature of the current area and the surrounding areas
+
+        parameters:
+        ----------
+            room: room object
+                contains temperature information about a given area
+            i: int
+                x location of the current 'particle' in the room
+            j: int
+                y location of the current 'particle' in the room
+
+        returns:
+        -------
+            tot/n: int
+                avg - total surrounding temp / number of surrounding measurements
+
+    '''
+    
+    n,tot = 0,0
+    for x in [-1,0,1]:
+        for y in [-1,0,1]:
+            #check if indexing out of bounds of array
+            try: 
+                tot += room.temp[i+x][j+y]
+                n += 1
+            except IndexError:
+                pass
+    return tot/n
+                    
+
+
+            
 def new_temp(T0,T_surround,delta_t,height=2):
     ''' finding the new temperature of one partition in the room
 
@@ -41,11 +81,13 @@ def air_density_calculator(temp):
     R = 8.3145 # gas constant (J/mol*K)
     return (pressure*M)/(R*T)
 
-def update_temps(time):
+def update_temps(room,time):
     ''' updates the temperatures of all heat sources at a given time
 
         parameters:
         ----------
+            room: room object
+                contains temperature information about a given area
             time: float
                 time elapsed from beginning of simulation
     '''
@@ -64,11 +106,12 @@ def temp_fun_heater1(time):
 
     return 30 + 0*time
 
-'''def greater_than_index(time,source_times):
-    for t in range(source_times):
-        if t == len(source_times):
-            return -1
-        if (time >= source_times[t] and time < source_times[t+1]):
-            return t
-    raise KeyError
-'''
+if __name__ == '__main__':
+
+    n = 100
+    room = room(10,5,20,n)
+    heater = source('heater1',1,1.5,0,0.2,temp_fun_heater1)
+    bed = calc_point(0,2,2,3,'my_bed')
+
+    room.add_calc_point(n,bed)
+    room.add_source(n,heater)
